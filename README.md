@@ -1,6 +1,6 @@
 # Niskin-BelowSpoutMS
 
-Script used in the manuscript
+Scripts used in the manuscript
 “Niskin bottle sample collection aliases microbial community composition and biogeochemical interpretation”
 
 Elizabeth A. Suter1, Mary I. Scranton1, Stephanie Chow1, Dallyce Stinton1, Luis Medina2, Gordon T. Taylor1
