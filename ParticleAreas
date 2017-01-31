@@ -1,0 +1,29 @@
+// The following is a macro for use in ImageJ that tabulates the individual areas from each particle from a set of images (in their own directory) and counts the total number of particles for images taken at 630X magnification.
+
+TEPFolder = getDirectory("Choose the folder of 630X TEP images");
+TEP_outlineFolder = getDirectory("Choose the output folder for processed outlines of 630X TEP images");
+
+setBatchMode(false);
+TEPimages = getFileList(TEPFolder);
+for (i=0; i<TEPimages.length; i++) {
+
+inputPath = TEPFolder + TEPimages[i];
+open(inputPath);
+TEPname=getTitle();
+
+run("Set Scale...", "distance=1280 known=63 pixel=1 unit=µm global");
+run("Split Channels");
+selectWindow("C1-" + TEPname);
+run("Set Measurements...", "area perimeter fit limit redirect=None decimal=3");
+
+// MAXIMUM THRESHOLD MUST BE MANUALLY OPTIMIZED BY USER. USUALLY BETWEEN 20,000 AND 30,000
+setThreshold(0, 25000);
+run("Analyze Particles...", "size=0.20-Infinity circularity=0.00-1.00 show=Outlines display");
+run("Invert");
+saveAs("Tiff", TEP_outlineFolder + TEPname);
+close(); close(); close(); close(); 
+}
+
+saveAs("Measurements", TEP_outlineFolder + "Results.xls");
+
+ 
