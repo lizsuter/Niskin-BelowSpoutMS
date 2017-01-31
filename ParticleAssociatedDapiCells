@@ -1,0 +1,61 @@
+// The following is a macro for use in ImageJ that generates binary images of particles overlain with corresponding DAPI images. Scaling is set for 1000X magnification.
+
+DAPIFolder = getDirectory("Choose the folder of DAPI images");
+TEPFolder = getDirectory("Choose the folder of TEP images");
+DAPI_processedFolder = getDirectory("Choose the output folder for processed DAPI images");
+TEP_outlineFolder = getDirectory("Choose the output folder for processed outlines of TEP images");
+DAPITEP_mergedFolder = getDirectory("Choose the output folder for the merged DAPI TEP images");
+
+setBatchMode(false);
+
+DAPIimages = getFileList(DAPIFolder);
+TEPimages = getFileList(TEPFolder);
+
+for (i=0; i<DAPIimages.length; i++) {
+
+inputPath = DAPIFolder + DAPIimages[i];
+open(inputPath);
+
+DAPIname = getTitle();
+run("Split Channels");
+selectWindow("C3-" + DAPIname);
+run("Subtract Background...", "rolling=40");
+run("Enhance Contrast...", "saturated=0.01");
+saveAs("Gif", DAPI_processedFolder+ DAPIname);
+close(); close(); close();
+
+inputPath = TEPFolder + TEPimages[i];
+open(inputPath);
+TEPname=getTitle();
+
+run("Set Scale...", "distance=12.800 known=1 pixel=1 unit=µm global");
+run("Split Channels");
+selectWindow("C1-" + TEPname);
+run("Set Measurements...", "area perimeter fit limit redirect=None decimal=3");
+
+// MAXIMUM THRESHOLD MUST BE MANUALLY OPTIMIZED BY USER. USUALLY BETWEEN 20,000 AND 30,000
+setThreshold(0, 25000);
+run("Analyze Particles...", "size=0.20-Infinity circularity=0.00-1.00 show=Outlines display");
+run("Invert");
+saveAs("Tiff", TEP_outlineFolder + TEPname);
+close(); close(); close(); close();
+}
+
+
+DAPI_processed_images = getFileList(DAPI_processedFolder);
+TEP_processed_images = getFileList(TEP_outlineFolder);
+
+for (i=0; i<DAPI_processed_images.length; i++) {
+inputPath = DAPI_processedFolder + DAPI_processed_images[i];
+open(inputPath);
+DAPI_processed_name = getTitle();
+
+inputPath = TEP_outlineFolder + TEP_processed_images[i];
+open(inputPath);
+TEP_processed_name = getTitle();
+run("Merge Channels...", "c1=["+TEP_processed_name+"] c3=["+DAPI_processed_name+"] create keep");
+run("Grid ", "grid=Lines area=100 color=White");
+
+saveAs("Jpg", DAPITEP_mergedFolder + TEP_processed_name);
+close();  close(); close(); 
+}
